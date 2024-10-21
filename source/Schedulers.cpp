@@ -64,7 +64,9 @@ void Scheduler::execute() {
     if(blocked_queue != NULL) {
         for(int index = 0; index < blocked_queue->size(); index++) {
             if(blocked_queue->getindex(index)->io_burst <= 0) {
-                cout << "Process " << cpu->getpcb()->pid << " moved from BLOCKED state to READY state at "<< dispatcher->gettime()<<endl;
+                if(blocked_queue->getindex(index)->process_states.back() != "READY") blocked_queue->getindex(index)->add_state("READY");
+                cout << "Process " << cpu->getpcb()->pid << " moved from BLOCKED state to READY state at "<< cpu->gettime();
+                cout<<", Time left: " << cpu->getpcb()->time_left << endl;
                 ready_queue->add_end(*blocked_queue->getindex(index));
                 blocked_queue->removeindex(index);
             } else {
@@ -120,15 +122,19 @@ void Scheduler::rr() {
 void Scheduler::pp() {
     int low_prio;
     int low_index = -1;
-
+    // cout<<"At time: "<< cpu->gettime();
     //if cpu is idle, set next pcb in queue as lowest priority initially
     if(!cpu->isidle()) { 
+        if(cpu->getpcb()->process_states.back() != "RUNNING") cpu->getpcb()->add_state("RUNNING");
         low_prio = cpu->getpcb()->priority; 
-        
+        cout<<"entered if\n";
         if((timeq != -1) && (cpu->getpcb()->io_burst > 0) && (cpu->getpcb()->blocked == false)) {
             if(timer <= 0.5*timeq) {
+                cout<<"dsafdsa"<<endl;
                 timer = timeq;
-                cout << "Process " << cpu->getpcb()->pid << " moved from RUNNING state to BLOCKED state at "<< dispatcher->gettime()<<endl;
+                if(cpu->getpcb()->process_states.back() != "BLOCKED") cpu->getpcb()->add_state("BLOCKED");
+                cout << "Process " << cpu->getpcb()->pid << " moved from RUNNING state to BLOCKED state at "<< cpu->gettime();
+                cout<<", Time left: "<<cpu->getpcb()->time_left<<endl;
                 cpu->getpcb()->blocked = true;
                 blocked_queue->add_end(*cpu->getpcb());
                 dispatcher->interrupt();
@@ -136,25 +142,40 @@ void Scheduler::pp() {
         }
 
         
-        if(timeq != -1 && timer <= 0) {
-            timer = timeq;
-            dispatcher->interrupt();
-        }
+        // if(timeq != -1 && timer <= 0) {
+        //     timer = timeq;
+        //     dispatcher->interrupt();
+        // }
     }
     else{
+        cout<<"entered else\n";
         low_prio = ready_queue->gethead()->priority;
         low_index = 0;
         if(timeq != -1) timer = timeq;
     }
 
+    cout<<"timer: "<< timer <<", lp: "<<low_prio<<", li: "<<low_index<<", Processes in ready queue: ";
     //search through entire queue for actual lowest priority
     for(int index = 0; index < ready_queue->size(); ++index){
         int temp_prio = ready_queue->getindex(index)->priority;
+        cout<<ready_queue->getindex(index)->pid<<"("<<temp_prio<<") ";
         if(temp_prio < low_prio){ //less than ensures FCFS is used for ties
             low_prio = temp_prio;
             low_index = index;
+        } else if(temp_prio == low_prio && timer == 0) {
+            low_index = index;
+            break;
         }
     }
+    if(timeq != -1 && timer <= 0) {
+            timer = timeq;
+            if(low_index!=-1)
+                dispatcher->interrupt();
+    }
+    cout<<", low prio: "<<low_prio<<" ";
+    cout<<endl;
+    if(low_index!=-1)
+        cout<<"next pid "<<ready_queue->getindex(low_index)->pid<<endl;
 
     //only -1 if couldn't find a pcb to schedule, happens if cpu is already working on lowest priority
     if(low_index >= 0){
@@ -200,10 +221,16 @@ void Dispatcher::execute() {
         if(old_pcb != NULL){ //only consider it a switch if cpu was still working on process
             old_pcb->num_context++;
             cpu->getpcb()->wait_time += .5;
-            cout << "Process " << cpu->getpcb()->pid << " moved from READY state to RUNNING state at "<< clock->gettime()<<endl;
+            if(cpu->getpcb()->process_states.back() != "RUNNING") cpu->getpcb()->add_state("RUNNING");
+
+            // cpu->getpcb()->add_state("RUNNING");
             clock->step();
+            if(old_pcb->process_states.back() != "READY" && old_pcb->time_left > 0) old_pcb->add_state("READY");
             ready_queue->add_end(*old_pcb);
-            cout << "Process " << old_pcb->pid << " moved from RUNNING state to READY state at "<< clock->gettime()<<endl;
+            cout << "Process " << old_pcb->pid << " moved from RUNNING state to READY state at "<< clock->gettime();
+            cout<<", Time left: "<<old_pcb->time_left<<endl;
+            cout << "Process " << cpu->getpcb()->pid << " moved from READY state to RUNNING state at "<< clock->gettime();
+            cout<<", Time left: "<<cpu->getpcb()->time_left<<endl;
             delete old_pcb;
         }
         _interrupt = false;

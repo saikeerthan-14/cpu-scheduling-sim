@@ -25,5 +25,6 @@ public:
     StatUpdater(DList<PCB> *rq, DList<PCB> *fq, Clock *cl, int alg, std::string fn, int tq);
     void execute();
     void print();
+    void print_process_states(PCB pcb, std::ofstream& outfile);
 };
 #endif //LAB2_STATUPDATER_H

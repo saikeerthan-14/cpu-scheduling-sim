@@ -23,6 +23,19 @@ void StatUpdater::execute() {
     }
 }
 
+void StatUpdater::print_process_states(PCB pcb, std::ofstream& outfile) {
+    // outfile << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+    outfile << "Process " << pcb.pid << " Life Cycle:" << std::endl;
+    // pcb.process_states.push_back("hahaa");
+    // std::cout<<pcb.process_states.size()<<std::endl;
+    for(auto str: pcb.process_states) {
+        outfile << str << " --> ";
+    }
+    outfile << "End of Process " << pcb.pid << " Life Cycle" << std::endl
+            << "***********************************************************************************************************************************" << std::endl;
+
+}
+
 
 //straightforward print function that prints to file using iomanip and column for a table format
 //uses finished queue to tally up final stats
@@ -57,22 +70,35 @@ void StatUpdater::print() {
     if(timeq != -1) outfile << "(No. Of Tasks = " << finished_queue->size() << " Quantum = " << timeq << ")" << std::endl;
     outfile << "*******************************************************************" << std::endl;
 
-    outfile << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
-    outfile << "| " << std::left << std::setw(colwidth) << "PID" << "| " << std::left << std::setw(colwidth) << "Arrival"
-            << "| " << std::left << std::setw(colwidth) << "CPU-Burst" << "| " << std::left << std::setw(colwidth) << "Priority"
-            << "| " ;
-    if(algorithm == 3) {
-        outfile << std::left << std::setw(colwidth) << "IO-Burst" << "| ";
-    }
+    // outfile << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+    // outfile << "| " << std::left << std::setw(colwidth) << "PID" << "| " << std::left << std::setw(colwidth) << "Arrival"
+    //         << "| " << std::left << std::setw(colwidth) << "CPU-Burst" << "| " << std::left << std::setw(colwidth) << "Priority"
+    //         << "| " ;
+    // if(algorithm == 3) {
+    //     outfile << std::left << std::setw(colwidth) << "IO-Burst" << "| ";
+    // }
 
-    outfile << std::left << std::setw(colwidth) << "Finish" << "| " << std::left << std::setw(colwidth) << "Waiting"
-            << "| " << std::left << std::setw(colwidth) << "Turnaround" << "| " << std::left << std::setw(colwidth) << "Response"
-            << "| " << std::left << std::setw(colwidth) << "C. Switches" << " | " << std::endl
-            << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+    // outfile << std::left << std::setw(colwidth) << "Finish" << "| " << std::left << std::setw(colwidth) << "Waiting"
+    //         << "| " << std::left << std::setw(colwidth) << "Turnaround" << "| " << std::left << std::setw(colwidth) << "Response"
+    //         << "| " << std::left << std::setw(colwidth) << "C. Switches" << " | " << std::endl
+    //         << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
 
     for(int id = 1; id < num_tasks+1; ++id){
         for(int index = 0; index < finished_queue->size(); ++index){
             if(finished_queue->getindex(index)->pid == id){
+                outfile << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+                outfile << "| " << std::left << std::setw(colwidth) << "PID" << "| " << std::left << std::setw(colwidth) << "Arrival"
+                        << "| " << std::left << std::setw(colwidth) << "CPU-Burst" << "| " << std::left << std::setw(colwidth) << "Priority"
+                        << "| " ;
+                if(algorithm == 3) {
+                    outfile << std::left << std::setw(colwidth) << "IO-Burst" << "| ";
+                }
+
+                outfile << std::left << std::setw(colwidth) << "Finish" << "| " << std::left << std::setw(colwidth) << "Waiting"
+                        << "| " << std::left << std::setw(colwidth) << "Turnaround" << "| " << std::left << std::setw(colwidth) << "Response"
+                        << "| " << std::left << std::setw(colwidth) << "C. Switches" << " | " << std::endl
+                        << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+
                 PCB temp = finished_queue->removeindex(index);
                 float turnaround = temp.finish_time - temp.arrival;
                 tot_burst += temp.burst;
@@ -94,6 +120,7 @@ void StatUpdater::print() {
                         << turnaround << "| " << std::left << std::setw(colwidth) << temp.resp_time << "| " << std::left << std::setw(colwidth)
                         << temp.num_context << "|" << std::endl;
                 outfile << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+                print_process_states(temp, outfile);
             }
         }
     }

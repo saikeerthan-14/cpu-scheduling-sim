@@ -38,6 +38,9 @@ int main(int argc, char* argv[]) {
 
         //loop will continue until no more processes are going to be generated, no more in ready queue, and cpu is done
         while (!pgen.finished() || ready_queue->size() || !cpu.isidle()) {
+            cout<<"========================\nTime: ";
+            cout<<clock.gettime()<<endl;
+            cout<<"========================\n";
             pgen.generate();
             scheduler.execute();
             dispatcher.execute();

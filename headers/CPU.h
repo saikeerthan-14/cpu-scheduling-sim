@@ -22,6 +22,9 @@ public:
     bool isidle();
     void execute();
     void terminate();
+    int gettime() {
+        return clock->gettime();
+    }
 };
 
 #endif

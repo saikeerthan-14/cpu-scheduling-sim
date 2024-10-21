@@ -24,6 +24,7 @@ PCBGenerator::~PCBGenerator(){
 
 void PCBGenerator::generate(){
     if(!_finished && clock->gettime() >= nextPCB.arrival){
+        nextPCB.add_state("READY");
         ready_queue->add_end(nextPCB);
         readnext();
     }
