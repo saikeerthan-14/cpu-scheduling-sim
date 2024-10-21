@@ -23,6 +23,7 @@ void CPU::execute() {
         idle = false;
         if(!pcb->started){ //helps determine response time, only increments it if pcb hasn't been worked on yet
             pcb->started = true;
+            cout << "Process " << pcb->pid << " moved from READY state to RUNNING state for the first time at "<< clock->gettime()<<endl;
             pcb->resp_time = clock->gettime() - pcb->arrival;
         }
         pcb->time_left -= .5; //simulate process being worked on for a clock cycle
@@ -36,6 +37,8 @@ void CPU::execute() {
 
 //routine to update termination related stats, for StatUpdater to use later
 void CPU::terminate() {
+    cout << "Process " << pcb->pid << " moved from RUNNING state to TERMINATED state at "<< clock->gettime()+.5<<endl;
+
     pcb->finish_time = clock->gettime()+.5;
     finished_queue->add_end(*pcb);
     delete pcb;

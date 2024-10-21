@@ -20,6 +20,9 @@ public:
     PCB* switchcontext(int index);
     void execute();
     void interrupt();
+    int gettime() {
+        return clock->gettime();
+    }
 };
 
 class Scheduler{

@@ -1,13 +1,16 @@
 #include "../headers/Schedulers.h"
+using namespace std;
 
 Scheduler::Scheduler() {
     next_pcb_index = -1;
     ready_queue = NULL;
+    blocked_queue = NULL;
 }
 
 //constructor for non-RR algs
 Scheduler::Scheduler(DList<PCB> *rq, CPU *cp, int alg){
     ready_queue = rq;
+    blocked_queue = new DList<PCB>();
     cpu = cp;
     dispatcher = NULL;
     next_pcb_index = -1;
@@ -17,6 +20,7 @@ Scheduler::Scheduler(DList<PCB> *rq, CPU *cp, int alg){
 //constructor for RR alg
 Scheduler::Scheduler(DList<PCB> *rq, CPU *cp, int alg, int tq){
     ready_queue = rq;
+    blocked_queue = new DList<PCB>();
     cpu = cp;
     dispatcher = NULL;
     next_pcb_index = -1;
@@ -54,6 +58,18 @@ void Scheduler::execute() {
                 break;
             default:
                 break;
+        }
+    }
+
+    if(blocked_queue != NULL) {
+        for(int index = 0; index < blocked_queue->size(); index++) {
+            if(blocked_queue->getindex(index)->io_burst <= 0) {
+                cout << "Process " << cpu->getpcb()->pid << " moved from BLOCKED state to READY state at "<< dispatcher->gettime()<<endl;
+                ready_queue->add_end(*blocked_queue->getindex(index));
+                blocked_queue->removeindex(index);
+            } else {
+                blocked_queue->getindex(index)->io_burst -= 0.5;
+            }
         }
     }
 }
@@ -109,7 +125,18 @@ void Scheduler::pp() {
     if(!cpu->isidle()) { 
         low_prio = cpu->getpcb()->priority; 
         
-        if(timer <= 0){
+        if((timeq != -1) && (cpu->getpcb()->io_burst > 0) && (cpu->getpcb()->blocked == false)) {
+            if(timer <= 0.5*timeq) {
+                timer = timeq;
+                cout << "Process " << cpu->getpcb()->pid << " moved from RUNNING state to BLOCKED state at "<< dispatcher->gettime()<<endl;
+                cpu->getpcb()->blocked = true;
+                blocked_queue->add_end(*cpu->getpcb());
+                dispatcher->interrupt();
+            }
+        }
+
+        
+        if(timeq != -1 && timer <= 0) {
             timer = timeq;
             dispatcher->interrupt();
         }
@@ -117,7 +144,7 @@ void Scheduler::pp() {
     else{
         low_prio = ready_queue->gethead()->priority;
         low_index = 0;
-        timer = timeq;
+        if(timeq != -1) timer = timeq;
     }
 
     //search through entire queue for actual lowest priority
@@ -131,9 +158,9 @@ void Scheduler::pp() {
 
     //only -1 if couldn't find a pcb to schedule, happens if cpu is already working on lowest priority
     if(low_index >= 0){
+        if(timeq != -1) timer = timeq;
         next_pcb_index = low_index;
         dispatcher->interrupt();
-        timer = timeq;
     }
 }
 
@@ -173,8 +200,10 @@ void Dispatcher::execute() {
         if(old_pcb != NULL){ //only consider it a switch if cpu was still working on process
             old_pcb->num_context++;
             cpu->getpcb()->wait_time += .5;
+            cout << "Process " << cpu->getpcb()->pid << " moved from READY state to RUNNING state at "<< clock->gettime()<<endl;
             clock->step();
             ready_queue->add_end(*old_pcb);
+            cout << "Process " << old_pcb->pid << " moved from RUNNING state to READY state at "<< clock->gettime()<<endl;
             delete old_pcb;
         }
         _interrupt = false;

@@ -60,13 +60,12 @@ void StatUpdater::print() {
     outfile << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
     outfile << "| " << std::left << std::setw(colwidth) << "PID" << "| " << std::left << std::setw(colwidth) << "Arrival"
             << "| " << std::left << std::setw(colwidth) << "CPU-Burst" << "| " << std::left << std::setw(colwidth) << "Priority"
-            << "| ";
-            
+            << "| " ;
     if(algorithm == 3) {
-        outfile << std::left << std::setw(colwidth) << "IO-Burst";
+        outfile << std::left << std::setw(colwidth) << "IO-Burst" << "| ";
     }
 
-    outfile << "| " << std::left << std::setw(colwidth) << "Finish" << "| " << std::left << std::setw(colwidth) << "Waiting"
+    outfile << std::left << std::setw(colwidth) << "Finish" << "| " << std::left << std::setw(colwidth) << "Waiting"
             << "| " << std::left << std::setw(colwidth) << "Turnaround" << "| " << std::left << std::setw(colwidth) << "Response"
             << "| " << std::left << std::setw(colwidth) << "C. Switches" << " | " << std::endl
             << "-----------------------------------------------------------------------------------------------------------------------------------" << std::endl;
