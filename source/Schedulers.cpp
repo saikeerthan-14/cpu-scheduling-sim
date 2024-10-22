@@ -129,8 +129,10 @@ void Scheduler::pp() {
         low_prio = cpu->getpcb()->priority; 
         cout<<"entered if\n";
         if((timeq != -1) && (cpu->getpcb()->io_burst > 0) && (cpu->getpcb()->blocked == false)) {
+            cout<<"entered blocked block\n";
             if(timer <= 0.5*timeq) {
-                cout<<"dsafdsa"<<endl;
+                cout<<"entered blocked block & if\n";
+
                 timer = timeq;
                 if(cpu->getpcb()->process_states.back() != "BLOCKED") cpu->getpcb()->add_state("BLOCKED");
                 cout << "Process " << cpu->getpcb()->pid << " moved from RUNNING state to BLOCKED state at "<< cpu->gettime();
@@ -167,6 +169,8 @@ void Scheduler::pp() {
             break;
         }
     }
+
+    
     if(timeq != -1 && timer <= 0) {
             timer = timeq;
             if(low_index!=-1)
@@ -176,6 +180,16 @@ void Scheduler::pp() {
     cout<<endl;
     if(low_index!=-1)
         cout<<"next pid "<<ready_queue->getindex(low_index)->pid<<endl;
+
+    if(blocked_queue != NULL) {
+        cout<<"Processes in blocked queue: ";
+        for(int index = 0; index < blocked_queue->size(); index++) {
+            
+            cout<<blocked_queue->getindex(index)->pid<<"("<<blocked_queue->getindex(index)->priority<<") ";
+            
+        }
+        cout<<endl;
+    }
 
     //only -1 if couldn't find a pcb to schedule, happens if cpu is already working on lowest priority
     if(low_index >= 0){
