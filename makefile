@@ -15,7 +15,7 @@ schedsim: $(OBJS)
 clean:
 	rm -f $(OBJS) 
 	rm -f $(BIN)/$(TARGET)
-	# rm -f $(BIN)/*
+	rm -f $(BIN)/*
 
 install:    
 	mv schedsim $(BIN)

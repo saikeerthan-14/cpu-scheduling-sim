@@ -167,7 +167,7 @@ void Scheduler::pp() {
         } else if(temp_prio == low_prio && timer == 0) {
             low_index = index;
             break;
-        }
+        } 
     }
 
     
@@ -237,7 +237,6 @@ void Dispatcher::execute() {
             cpu->getpcb()->wait_time += .5;
             if(cpu->getpcb()->process_states.back() != "RUNNING") cpu->getpcb()->add_state("RUNNING");
 
-            // cpu->getpcb()->add_state("RUNNING");
             clock->step();
             if(old_pcb->process_states.back() != "READY" && old_pcb->time_left > 0) old_pcb->add_state("READY");
             ready_queue->add_end(*old_pcb);
