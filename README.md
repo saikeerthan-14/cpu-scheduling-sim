@@ -32,6 +32,7 @@ An example input and output file is provided
 1 - SRTF, Shortest Remaining Time First (preemptive)
 2 - RR, Round Robin (must enter time quantum to execute)
 3 - PP, Preemptive Priority (uses provided priorities in input file)
+4 - PR, Preemptive Random
 
 #### Time Quantum
 How long each process runs on the CPU (minimum = .5)
@@ -39,12 +40,3 @@ How long each process runs on the CPU (minimum = .5)
 ### Prerequisites
 
 Program can be compile and ran with specified arguments using most IDEs that support C++. Implementation will depend on platform.
-
-## Built With
-
-* [CLion](https://www.jetbrains.com/clion/) - IDE Used
-
-## Authors
-
-* **Joseph Dodson** - *Sole contributor* - [joedodson](https://github.com/joedodson)
-
