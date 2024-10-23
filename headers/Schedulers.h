@@ -3,6 +3,7 @@
 
 #include "DList.h"
 #include "CPU.h"
+#include <random>
 
 class CPU;
 class Scheduler;
@@ -36,11 +37,13 @@ public:
     Scheduler(DList<PCB> *rq, CPU *cp, int alg, int tq);
     void setdispatcher(Dispatcher *disp);
     int getnext();
+    int get_random_number(int min_range, int max_range);
     void execute();
     void fcfs();
     void srtf();
     void rr();
     void pp();
+    void pr();
 };
 
 #endif //LAB2_SCHEDULER_H

@@ -1,4 +1,6 @@
 #include "../headers/Schedulers.h"
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
 Scheduler::Scheduler() {
@@ -55,6 +57,9 @@ void Scheduler::execute() {
                 break;
             case 3:
                 pp();
+                break;
+            case 4:
+                pr();
                 break;
             default:
                 break;
@@ -142,12 +147,6 @@ void Scheduler::pp() {
                 dispatcher->interrupt();
             }
         }
-
-        
-        // if(timeq != -1 && timer <= 0) {
-        //     timer = timeq;
-        //     dispatcher->interrupt();
-        // }
     }
     else{
         cout<<"entered else\n";
@@ -195,6 +194,31 @@ void Scheduler::pp() {
     if(low_index >= 0){
         if(timeq != -1) timer = timeq;
         next_pcb_index = low_index;
+        dispatcher->interrupt();
+    }
+}
+
+
+int Scheduler::get_random_number(int min_range, int max_range) {
+
+    std::uniform_int_distribution<int> distribute(min_range, max_range);
+
+    std::random_device rd;  // Seed the random number
+
+    std::mt19937 gen(rd()); // Mersenne Twister
+
+
+    // Generate a random number within the specified range
+    int number_random = distribute(gen);
+    return number_random;
+}
+
+void Scheduler::pr() {
+    if(cpu->isidle() || (timeq != -1 && timer <= 0)){
+        if (timeq != -1) timer = timeq;
+        if (ready_queue->size() > 0){
+            next_pcb_index = get_random_number(0, ready_queue->size()-1);
+        }
         dispatcher->interrupt();
     }
 }

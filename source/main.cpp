@@ -4,6 +4,8 @@
 #include "../headers/PCBGenerator.h"
 #include "../headers/CPU.h"
 #include "../headers/StatUpdater.h"
+#include <cstdlib>
+#include <ctime> 
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -20,7 +22,8 @@ int main(int argc, char* argv[]) {
     //variables to hold initial arguments
     int algorithm = atoi(argv[3]);
     int timeq = -1;
-    if((algorithm == 2) || (algorithm == 3 && argc == 5)) timeq = atoi(argv[4]);
+    if((algorithm == 2) || (algorithm == 3 && argc == 5) || (algorithm == 4 && argc == 5)) timeq = atoi(argv[4]);
+    std::srand(std::time(0));
 
     //queues to hold PCBs throughout
     auto ready_queue = new DList<PCB>();
